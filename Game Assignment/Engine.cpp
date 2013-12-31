@@ -80,8 +80,10 @@ void Engine::Cleanup()
 }
 
 void Engine::UpdateTime() {
-	current->ticks++;
-	current->deltatime = 0.1f;
+	unsigned int ticks = SDL_GetTicks();
+	unsigned int delta = ticks - current->ticks;
+    current->ticks = ticks;
+	current->deltatime = (float)delta * 0.001f;
 }
 
 void Engine::HandleEvents() 

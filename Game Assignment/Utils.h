@@ -46,6 +46,10 @@ namespace Utils {
 
 	/* Rounds a number the the nearest number n */
 	float roundToNearestN(float x, float n);
+
+	/* Compare float numbers */
+	bool AreSame(float a, float b);
+	bool AreSame(double a, double b);
 }
 
 #endif

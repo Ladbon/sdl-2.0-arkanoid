@@ -12,10 +12,15 @@ public:
 	void setDirection(float _dx, float _dy) { dx = _dx; dy = _dy; }
 	void setDirectionX(float _dx) { dx = _dx; }
 	void setDirectionY(float _dy) { dy = _dy; }
-	void move(float dt) {
+	void update(float dt) {
 		if(freezed) return;
 		x += dx * speed * dt;
 		y += dy * speed * dt;
+	}
+
+	void move(float _x, float _y) {
+		x += _x;
+		y += _y;
 	}
 
 	float getSpeed() { return speed; }
@@ -24,6 +29,7 @@ public:
 	
 	void freeze() { freezed = true; }
 	void unfreeze() { freezed = false; }
+	bool isFreezed() { return freezed; }
 
 	Circle getCircle();
 

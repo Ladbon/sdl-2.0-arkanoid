@@ -21,10 +21,10 @@ void Particle::draw(DrawManager* drawManager) {
 	SDL_RenderDrawPoint(drawManager->getRenderer(), (int)x, (int)y);
 }
 
-void Particle::update() {
+void Particle::update(float deltatime) {
 	life--;
-	x += velx * speed;
-	y += vely * speed;
+	x += velx * speed * deltatime;
+	y += vely * speed * deltatime;
 }
 
 float Particle::getX() {

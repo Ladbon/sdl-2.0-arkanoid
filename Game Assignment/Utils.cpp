@@ -6,6 +6,7 @@
 #include <cctype>
 #include <functional>
 #include <locale>
+#include <cfloat>
 
 #include "Utils.h"
 
@@ -69,5 +70,13 @@ namespace Utils {
 
 	int Utils::string_to_int(std::string v) {
 		return std::stoi(v);
+	}
+
+	bool Utils::AreSame(float a, float b) {
+		 return fabs(a - b) < FLT_EPSILON;
+	}
+
+	bool Utils::AreSame(double a, double b) {
+		 return fabs(a - b) < FLT_EPSILON;
 	}
 }

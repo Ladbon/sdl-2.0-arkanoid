@@ -27,22 +27,9 @@ public:
 	void setWidth(int _width) { width = _width; }
 	void setHeight(int _height) { height = _height; }
 	void setAlpha(int a) { alpha = a; }
-	
-	/**
-	*	Move our object and sprite property by x and y
-	*/
+
 	void move(float _x, float _y) { x += _x; y += _y; }
-
-	/**
-	*	Here we actually create the Sprite object
-	*	We get offset_x and offset_y by parameters and height and width by this class properties
-	*/
 	bool Create(SpriteManager *spriteManager, int offset_x, int offset_y);
-
-
-	/**
-	*	Here we add a method draw that will draw the Entity.
-	*/
 	void draw(DrawManager *drawManager);
 
 	std::string toString() { std::string s = "X: " + std::to_string(x) + ", Y: " + std::to_string(y) + ", W: " + std::to_string(width) + ", H: " + std::to_string(height); return s; }
@@ -54,6 +41,7 @@ protected:
 	int width;
 	int height;
 	std::string filename;
+	
 
 	Sprite *sprite;
 	int alpha;

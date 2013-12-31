@@ -26,12 +26,12 @@ Game::Game() {
 
 bool Game::Init() {
 	InitBricks();
-	player = new Player("paddle_normal.png", (drawManager->getWidth() * 0.5) - 75, drawManager->getHeight() - 50, 150, 30);
+	player = new Player("paddle_normal.png", (drawManager->getWidth() * 0.5) - 50, drawManager->getHeight() - 50, 100, 20);
 	player->Create(spriteManager, 0, 0);
 
-	Ball* ball = new Ball("ball.png", (drawManager->getWidth() * 0.5) - 16, drawManager->getHeight() - 50 - 32, 32, 32);
+	Ball* ball = new Ball("ball.png", (drawManager->getWidth() * 0.5) - 10, drawManager->getHeight() - 50 - 20, 20, 20);
 	ball->Create(spriteManager, 0, 0);
-	ball->setSpeed(1);
+	ball->setSpeed(8.0);
 	ball->setDirection(Utils::Random::frandom(-0.5, 0.5), -1.0f);
 	ball->freeze();
 	balls.push_back(ball);
@@ -72,7 +72,7 @@ bool Game::Update() {
 	/**
 	*	RELEASE BALL
 	*/
-	if(keyboard->IsDownOnce(SDLK_SPACE)) {
+	if(mouse->IsDownOnce(MB_LEFT)) {
 		for(auto it = balls.begin(); it != balls.end(); ++it) {
 			(*it)->unfreeze();
 		}
@@ -81,8 +81,12 @@ bool Game::Update() {
 	/**
 	*	PLAYER MOVEMENT
 	*/
-	printf("%f", deltatime);
 	player->setX(mouse->GetX()-(player->getWidth()/2));
+	for(auto it = balls.begin(); it != balls.end(); ++it) {
+		if((*it)->isFreezed()) {
+			(*it)->setX(mouse->GetX() - (*it)->getWidth()/2);
+		}
+	}
 
 	/**
 	*	PLAYER COLLISION WITH WINDOW BOUNDS
@@ -91,9 +95,6 @@ bool Game::Update() {
 	if(player->getY() < 0) { player->setY(0.0f); }
 	if(player->getX() + player->getWidth() > this->drawManager->getWidth()) { player->setX(this->drawManager->getWidth() - player->getWidth()); }
 	if(player->getY() + player->getHeight() > this->drawManager->getHeight()) { player->setY(this->drawManager->getHeight() - player->getHeight()); }
-	for(auto it = balls.begin(); it != balls.end(); ++it) {
-		(*it)->move(1.0);
-	}
 
 	/**
 	*	BALL(S) COLLISION WITH BOUNDS
@@ -134,10 +135,26 @@ bool Game::Update() {
 	}
 
 	/**
-	*	BALL COLLISION WITH PADDLE
+	*	BALL COLLISION WITH BRICKS
 	*/
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
-		(*it)->move(1.0);
+		for(auto y = bricks.begin(); y != bricks.end(); ++y) {
+			for(auto x = (*y).begin(); x != (*y).end(); ++x) {
+				std::vector<float> overflow = CollisionManager::collideRectPlus((*it)->getBounds(), (*x)->getBounds());
+				if(overflow[0] != 0 || overflow[1] != 0) {
+					(*it)->move(overflow[0], overflow[1]);
+					if(overflow[0] > overflow[1])
+						(*it)->setDirectionX((*it)->getDirectionX()*-1);
+					else
+						(*it)->setDirectionY((*it)->getDirectionY()*-1);
+				}
+			}
+		}
+	}
+
+	/* Move balls */
+	for(auto it = balls.begin(); it != balls.end(); ++it) {
+		(*it)->update((*it)->getSpeed() * deltatime);
 	}
 
 	/**
@@ -148,7 +165,7 @@ bool Game::Update() {
 		if((*it)->isDead()) {
 			it = particles.erase(it);
 		} else {
-			(*it)->update();
+			(*it)->update(deltatime);
 			if((*it)->getX() < 0 || (*it)->getX() > drawManager->getWidth()) (*it)->setVelX((*it)->getVelX()*-1);
 			if((*it)->getY() < 0 || (*it)->getY() > drawManager->getHeight()) (*it)->setVelY((*it)->getVelY()*-1);
 			++it;
@@ -193,7 +210,7 @@ void Game::Draw() {
 
 void Game::SpawnParticles(unsigned int amount, int x, int y) {
 	for(int i = 0; i < amount; i++) {
-		Particle* part = new Particle(x,y, Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(0.5, 0.6), Utils::Random::random(100, 700), 0);
+		Particle* part = new Particle(x,y, Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(100.0, 200.0), Utils::Random::random(100, 700), 0);
 		particles.push_back(part);
 	}
 }

@@ -16,7 +16,7 @@ public:
 	Particle(float _x, float _y, float _velx, float _vely, float _speed, int _life, int _color);
 	bool isDead();
 	void draw(DrawManager* drawManager);
-	void update();
+	void update(float deltatime);
 	float getX();
 	float getY();
 	float getVelX();
