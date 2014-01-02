@@ -17,9 +17,41 @@ namespace CollisionManager {
 		return !(a.x + a.w < b.x || a.y + a.h < b.y || a.x > b.x + b.w || a.y > b.y + b.h);
 	}
 
-	std::vector<float> collideRectPlus(SDL_Rect a, SDL_Rect b) {
-		std::vector<float> r(2, 0);
-		float length_x = fabs((float)(a.x - b.x));
+	 /* 
+		Returns amount of overflow between 2 rectangles
+	 */
+	bool collideRectPlus(SDL_Rect a, SDL_Rect b, std::vector<float> &r) {
+		r[0] = r[1] = 0.0f;
+		float A = a.w * 0.5f;
+		float B = b.w * 0.5f;
+		float C = (a.x + A) - (b.x + B);
+		if(fabs(C) <= A + B) {
+			float Q = a.h * 0.5f;
+			float P = b.h * 0.5f;
+			float Z = (a.y + Q) - (b.y + P);
+			if(fabs(Z) <= Q + P) {
+				float dx = ceilf(fabs(C) - (A + B));
+				float dy = ceilf(fabs(Z) - (Q + P));
+				if(Utils::AreSame(dx, dx)) dx++;
+
+				if(dx > dy) {
+					if(a.x > b.x) {
+						r[0] = dx;
+					} else {
+						r[0] = -dx;
+					}
+				} else {
+					if(a.y > b.y) {
+						r[1] = -dy;
+					} else {
+						r[1] = dy;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+		/*float length_x = fabs((float)(a.x - b.x));
 		float length_y = fabs((float)(a.y - b.y));
 		if(length_x < (a.w * 0.5 + b.w * 0.5) && length_y < (a.h * 0.5 + b.h * 0.5)) {
 			float overflow_x = length_x - (a.w * 0.5 + b.w * 0.5);
@@ -40,7 +72,7 @@ namespace CollisionManager {
 				}
 			}
 		}
-		return r;
+		return r;*/
 	}
 
 	/* Circle vs Circle intersection */
@@ -53,6 +85,7 @@ namespace CollisionManager {
 		return false;
 	}
 
+	/* Pixelperfect collision uses this */
 	SDL_Rect Intersection(const SDL_Rect& a, const SDL_Rect& b) {
 		int x1 = Maximum(a.x, b.x);
 		int y1 = Maximum(a.y, b.y);

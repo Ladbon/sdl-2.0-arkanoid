@@ -20,7 +20,7 @@ bool Entity::Create(SpriteManager *spriteManager, int offset_x, int offset_y) {
 }
 
 void Entity::draw(DrawManager *drawManager) {
-	drawManager->Draw(this, (int)x - (width * 0.5), (int)y - (height * 0.5));
+	drawManager->Draw(this, (int)x, (int)y);
 }
 
 

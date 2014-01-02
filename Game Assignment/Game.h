@@ -1,6 +1,7 @@
 #pragma once
 
 #include "State.h"
+#include <list>
 #include <vector>
 
 class Player;
@@ -33,7 +34,9 @@ private:
 	Player *player;
 	std::vector<Ball*> balls;
 	std::vector<Particle*> particles;
-	std::vector<std::vector<Brick*>> bricks;
+	std::vector<Brick*> bricks;
+	int rows;
+	int columns;
 
 	Ball* ball1;
 	Ball* ball2;

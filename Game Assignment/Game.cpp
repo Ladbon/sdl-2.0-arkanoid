@@ -31,8 +31,8 @@ bool Game::Init() {
 
 	Ball* ball = new Ball("ball.png", (drawManager->getWidth() * 0.5) - 10, drawManager->getHeight() - 50 - 20, 20, 20);
 	ball->Create(spriteManager, 0, 0);
-	ball->setSpeed(8.0);
-	ball->setDirection(Utils::Random::frandom(-0.5, 0.5), -1.0f);
+	ball->setSpeed(16.0);
+	ball->setDirection(Utils::Random::frandom(-0.8, 0.8), -1.0f);
 	ball->freeze();
 	balls.push_back(ball);
 
@@ -44,6 +44,7 @@ bool Game::Init() {
 
 void Game::Exit() {
 
+	/* Delallocate all of our balls */
 	if(balls.size() > 0) {
 		auto it = balls.begin();
 		while(it != balls.end()) {
@@ -53,6 +54,7 @@ void Game::Exit() {
 	}
 	balls.clear();
 
+	/* Deallocate all of the particles(might be removed in future because current particles sucks) */
 	if(particles.size() > 0) {
 		auto it = particles.begin();
 		while(it != particles.end()) {
@@ -61,7 +63,18 @@ void Game::Exit() {
 		};
 	}
 	particles.clear();
+
+	/* Deallocate bricks */
+	/*if(bricks.size() > 0) {
+		auto it = particles.begin();
+		while(it != particles.end()) {
+			delete (*it);
+			++it;
+		};
+	}*/
+	particles.clear();
 	
+	/* Deallocate player */
 	delete player;
 	player = nullptr;
 
@@ -138,15 +151,29 @@ bool Game::Update() {
 	*	BALL COLLISION WITH BRICKS
 	*/
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
-		for(auto y = bricks.begin(); y != bricks.end(); ++y) {
-			for(auto x = (*y).begin(); x != (*y).end(); ++x) {
-				std::vector<float> overflow = CollisionManager::collideRectPlus((*it)->getBounds(), (*x)->getBounds());
+		for(auto b = bricks.begin(); b != bricks.end(); ++b) {
+
+			/* Return overlap/overflow with collision */
+			std::vector<float> overflow(2, 0);
+			
+			if(CollisionManager::collideRectPlus((*it)->getBounds(), (*b)->getBounds(), overflow)) {
+
+				/* If there are any overlap in any axis (if its colliding) */
 				if(overflow[0] != 0 || overflow[1] != 0) {
+					/* Move */
+					
 					(*it)->move(overflow[0], overflow[1]);
+
+					/* Change direction of ball */
 					if(overflow[0] > overflow[1])
 						(*it)->setDirectionX((*it)->getDirectionX()*-1);
 					else
 						(*it)->setDirectionY((*it)->getDirectionY()*-1);
+				
+					// Remove block
+					delete (*b);
+					b = bricks.erase(b);
+					--b;
 				}
 			}
 		}
@@ -155,6 +182,29 @@ bool Game::Update() {
 	/* Move balls */
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		(*it)->update((*it)->getSpeed() * deltatime);
+		std::vector<float> overflow(2, 0);
+		
+		// Ball collision with paddle
+		// Here we calculate the new x-velocity based on where on the paddle the ball bounce
+		if(CollisionManager::collideRectPlus((*it)->getBounds(), player->getBounds(), overflow)) {
+			if(overflow[0] != 0 || overflow[1] != 0) {
+				/* Move */
+				printf("Overflow-Y: %f, ", overflow[1]);
+				(*it)->move(overflow[0], overflow[1]);
+
+				/* Change direction of ball */
+				if(overflow[1] < 0) {
+					(*it)->setDirectionY((*it)->getDirectionY()*-1);
+					
+					// Here happens the magic
+					// Basicly it says
+					//
+					// x_velocity = (ball_center - paddle_center) / (ball_width / 2)
+					//
+					(*it)->setDirectionX((((*it)->getX() + (*it)->getWidth()*.5) - (player->getX() + player->getWidth()*.5))/player->getWidth()*.5);
+				}
+			}
+		}
 	}
 
 	/**
@@ -189,10 +239,8 @@ void Game::Draw() {
 	*/
 	player->draw(drawManager);
 	
-	for(auto y = bricks.begin(); y != bricks.end(); ++y) {
-		for(auto x = (*y).begin(); x != (*y).end(); ++x) {
-			(*x)->draw(drawManager);
-		}
+	for(auto it = bricks.begin(); it != bricks.end(); ++it) {
+		(*it)->draw(drawManager);
 	}
 
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
@@ -243,15 +291,15 @@ bool Game::InitBricks() {
 	int row_size;
 
 	fstream >> row_size >> brick_width >> brick_height;
+	columns = row_size;
 
 	int x = 0;
 	int y = 0;
 	row = "";
+	int count_rows = 0;
 	while(!fstream.eof()) {
 		std::getline(fstream, row, '\n');
 		if(row.length() == 0) continue;
-
-		std::vector<Brick*> r;
 
 		x = 0;
 		for(int i = 0; i < row.length(); i++) {
@@ -259,12 +307,14 @@ bool Game::InitBricks() {
 			if(it == brick_info.end()) continue;
 			Brick *brick = new Brick(it->second, x, y, brick_width, brick_height);
 			brick->Create(spriteManager, 0, 0);
-			r.push_back(brick);
+			bricks.push_back(brick);
 			x += brick_width;
 		}
-		bricks.push_back(r);
 		y += brick_height;
+		count_rows++;
 	}
+
+	rows = count_rows;
 
 	return true;
 }

@@ -1,6 +1,8 @@
 #include "DrawManager.h"
 #include "Entity.h"
 #include "SDL.h"
+#include "Utils.h"
+#include "Config.h"
 #include "Sprite.h"
 #include <stdio.h>
 
@@ -29,7 +31,7 @@ void DrawManager::Cleanup() {
 }
 
 void DrawManager::Clear() {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderDrawColor(renderer, Utils::string_to_int(Config::get("background_red")), Utils::string_to_int(Config::get("background_green")), Utils::string_to_int(Config::get("background_blue")), Utils::string_to_int(Config::get("background_alpha")));
 	SDL_RenderClear(renderer);
 }
 
