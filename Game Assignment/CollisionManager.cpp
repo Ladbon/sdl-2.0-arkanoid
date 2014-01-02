@@ -51,28 +51,6 @@ namespace CollisionManager {
 			}
 		}
 		return false;
-		/*float length_x = fabs((float)(a.x - b.x));
-		float length_y = fabs((float)(a.y - b.y));
-		if(length_x < (a.w * 0.5 + b.w * 0.5) && length_y < (a.h * 0.5 + b.h * 0.5)) {
-			float overflow_x = length_x - (a.w * 0.5 + b.w * 0.5);
-			float overflow_y = length_y - (a.h * 0.5 + b.h * 0.5);
-			if(Utils::AreSame(overflow_x, overflow_y)) overflow_x++;
-
-			if(overflow_x > overflow_y) {
-				if(a.x > b.x) {
-					r[0] = -overflow_x;
-				} else {
-					r[0] = overflow_x;
-				}
-			} else {
-				if(a.y > b.y) {
-					r[1] = -overflow_y;
-				} else {
-					r[1] = overflow_y;
-				}
-			}
-		}
-		return r;*/
 	}
 
 	/* Circle vs Circle intersection */
