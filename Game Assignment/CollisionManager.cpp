@@ -17,42 +17,6 @@ namespace CollisionManager {
 		return !(a.x + a.w < b.x || a.y + a.h < b.y || a.x > b.x + b.w || a.y > b.y + b.h);
 	}
 
-	 /* 
-		Returns amount of overflow between 2 rectangles
-	 */
-	bool collideRectPlus(SDL_Rect a, SDL_Rect b, std::vector<float> &r) {
-		r[0] = r[1] = 0.0f;
-		float A = a.w * 0.5f;
-		float B = b.w * 0.5f;
-		float C = (a.x + A) - (b.x + B);
-		if(fabs(C) <= A + B) {
-			float Q = a.h * 0.5f;
-			float P = b.h * 0.5f;
-			float Z = (a.y + Q) - (b.y + P);
-			if(fabs(Z) <= Q + P) {
-				float dx = ceilf(fabs(C) - (A + B));
-				float dy = ceilf(fabs(Z) - (Q + P));
-				if(Utils::AreSame(dx, dx)) dx++;
-
-				if(dx > dy) {
-					if(a.x > b.x) {
-						r[0] = dx;
-					} else {
-						r[0] = -dx;
-					}
-				} else {
-					if(a.y > b.y) {
-						r[1] = -dy;
-					} else {
-						r[1] = dy;
-					}
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/* Circle vs Circle intersection */
 	bool collideCircle(Circle a, Circle b) {
 		float dx = b.x - a.x;

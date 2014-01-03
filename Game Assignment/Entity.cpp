@@ -74,3 +74,10 @@ SDL_Rect Entity::NormalizeBounds(SDL_Rect& rect) {
 	normalized.h = rect.h;
 	return normalized;
 }
+
+bool Entity::collideRectPoint(float _x, float _y) {
+	return (
+		((_x >= x) && (_x < x + width))
+		&& ((_y >= y) && (_y < y + height))
+    );
+}

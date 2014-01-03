@@ -19,13 +19,15 @@ public:
 	bool Update();
 	void Draw();
 
-	void SpawnParticles(unsigned int amount, int x, int y);
+	void SpawnParticles(int amount, int x, int y);
 
 	std::string Next();
 	void setNextState(std::string state);
 	bool IsType(const std::string &type);
 	bool LoadBrickInfo();
 	bool InitBricks();
+
+	void checkBallsBrickCollision();
 
 private:
 	std::string next_state;

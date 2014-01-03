@@ -26,6 +26,8 @@ public:
 	float getSpeed() { return speed; }
 	float getDirectionX() { return dx; }
 	float getDirectionY() { return dy; }
+	void invertDirectionX() { dx *= -1; }
+	void invertDirectionY() { dy *= -1; }
 	
 	void freeze() { freezed = true; }
 	void unfreeze() { freezed = false; }

@@ -15,6 +15,7 @@ void Menu::Exit() {
 
 
 bool Menu::Update() {
+	printf("Menu update\n");
 	// If we wanna change to any state from here
 	/**
 	*	If we wanna change from any state to any state,

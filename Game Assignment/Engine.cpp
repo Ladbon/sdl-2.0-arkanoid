@@ -14,6 +14,7 @@ Engine::Engine() {
 	spriteManager = nullptr;
 	keyboard = nullptr;
 	mouse = nullptr;
+	m_running = true;
 };
 
 Engine::~Engine() {
@@ -155,6 +156,7 @@ void Engine::SetState(const std::string &type) {
 			current->ticks = 0;
 			current->window = window;
 			current->Init();
+			printf("State was set\n");
 		};
 	};
 }

@@ -25,14 +25,15 @@ Game::Game() {
 };
 
 bool Game::Init() {
+	printf("Game init\n");
 	InitBricks();
-	player = new Player("paddle_normal.png", (drawManager->getWidth() * 0.5) - 50, drawManager->getHeight() - 50, 100, 20);
+	player = new Player("paddle_normal.png", (float)(drawManager->getWidth() * 0.5) - 50, (float)(drawManager->getHeight() - 50), 100, 20);
 	player->Create(spriteManager, 0, 0);
 
-	Ball* ball = new Ball("ball.png", (drawManager->getWidth() * 0.5) - 10, drawManager->getHeight() - 50 - 20, 20, 20);
+	Ball* ball = new Ball("ball.png", (float)(drawManager->getWidth() * 0.5) - 10, (float)(drawManager->getHeight() - 50 - 20), 20, 20);
 	ball->Create(spriteManager, 0, 0);
-	ball->setSpeed(16.0);
-	ball->setDirection(Utils::Random::frandom(-0.8, 0.8), -1.0f);
+	ball->setSpeed(20.0);
+	ball->setDirection(Utils::Random::frandom(-0.8f, 0.8f), -1.0f);
 	ball->freeze();
 	balls.push_back(ball);
 
@@ -83,6 +84,14 @@ void Game::Exit() {
 
 bool Game::Update() {
 	/**
+	*	DEBUG 
+	*/
+	if(keyboard->IsDown(SDLK_SPACE)) {
+		balls[0]->setSpeed(8.0f);
+	} else {
+		balls[0]->setSpeed(20.0f);
+	}
+	/**
 	*	RELEASE BALL
 	*/
 	if(mouse->IsDownOnce(MB_LEFT)) {
@@ -94,10 +103,10 @@ bool Game::Update() {
 	/**
 	*	PLAYER MOVEMENT
 	*/
-	player->setX(mouse->GetX()-(player->getWidth()/2));
+	player->setX((float)(mouse->GetX()-(player->getWidth()*0.5f)));
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		if((*it)->isFreezed()) {
-			(*it)->setX(mouse->GetX() - (*it)->getWidth()/2);
+			(*it)->setX((float)(mouse->GetX() - (*it)->getWidth()*0.5f));
 		}
 	}
 
@@ -106,8 +115,12 @@ bool Game::Update() {
 	*/
 	if(player->getX() < 0) { player->setX(0.0f); }
 	if(player->getY() < 0) { player->setY(0.0f); }
-	if(player->getX() + player->getWidth() > this->drawManager->getWidth()) { player->setX(this->drawManager->getWidth() - player->getWidth()); }
-	if(player->getY() + player->getHeight() > this->drawManager->getHeight()) { player->setY(this->drawManager->getHeight() - player->getHeight()); }
+	if(player->getX() + player->getWidth() > this->drawManager->getWidth()) { 
+			player->setX((float)(this->drawManager->getWidth() - player->getWidth())); 
+	}
+	if(player->getY() + player->getHeight() > this->drawManager->getHeight()) { 
+		player->setY((float)(this->drawManager->getHeight() - player->getHeight())); 
+	}
 
 	/**
 	*	BALL(S) COLLISION WITH BOUNDS
@@ -143,68 +156,20 @@ bool Game::Update() {
 	
 	if(colliding_balls.size() > 0) {
 		for(auto it = colliding_balls.begin(); it != colliding_balls.end(); ++it) {
-			SpawnParticles(100, (*it)->getX(), (*it)->getY());
+			SpawnParticles(100, (int)(*it)->getX(), (int)(*it)->getY());
 		}		
 	}
 
 	/**
 	*	BALL COLLISION WITH BRICKS
 	*/
-	for(auto it = balls.begin(); it != balls.end(); ++it) {
-		for(auto b = bricks.begin(); b != bricks.end(); ++b) {
-
-			/* Return overlap/overflow with collision */
-			std::vector<float> overflow(2, 0);
-			
-			if(CollisionManager::collideRectPlus((*it)->getBounds(), (*b)->getBounds(), overflow)) {
-
-				/* If there are any overlap in any axis (if its colliding) */
-				if(overflow[0] != 0 || overflow[1] != 0) {
-					/* Move */
-					
-					(*it)->move(overflow[0], overflow[1]);
-
-					/* Change direction of ball */
-					if(overflow[0] > overflow[1])
-						(*it)->setDirectionX((*it)->getDirectionX()*-1);
-					else
-						(*it)->setDirectionY((*it)->getDirectionY()*-1);
-				
-					// Remove block
-					delete (*b);
-					b = bricks.erase(b);
-					--b;
-				}
-			}
-		}
-	}
+	checkBallsBrickCollision();
 
 	/* Move balls */
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		(*it)->update((*it)->getSpeed() * deltatime);
 		std::vector<float> overflow(2, 0);
-		
-		// Ball collision with paddle
-		// Here we calculate the new x-velocity based on where on the paddle the ball bounce
-		if(CollisionManager::collideRectPlus((*it)->getBounds(), player->getBounds(), overflow)) {
-			if(overflow[0] != 0 || overflow[1] != 0) {
-				/* Move */
-				printf("Overflow-Y: %f, ", overflow[1]);
-				(*it)->move(overflow[0], overflow[1]);
 
-				/* Change direction of ball */
-				if(overflow[1] < 0) {
-					(*it)->setDirectionY((*it)->getDirectionY()*-1);
-					
-					// Here happens the magic
-					// Basicly it says
-					//
-					// x_velocity = (ball_center - paddle_center) / (ball_width / 2)
-					//
-					(*it)->setDirectionX((((*it)->getX() + (*it)->getWidth()*.5) - (player->getX() + player->getWidth()*.5))/player->getWidth()*.5);
-				}
-			}
-		}
 	}
 
 	/**
@@ -256,9 +221,9 @@ void Game::Draw() {
 	}
 }
 
-void Game::SpawnParticles(unsigned int amount, int x, int y) {
+void Game::SpawnParticles(int amount, int x, int y) {
 	for(int i = 0; i < amount; i++) {
-		Particle* part = new Particle(x,y, Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(100.0, 200.0), Utils::Random::random(100, 700), 0);
+		Particle* part = new Particle((float)x,(float)y, Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(100.0, 200.0), Utils::Random::random(100, 700), 0);
 		particles.push_back(part);
 	}
 }
@@ -302,10 +267,10 @@ bool Game::InitBricks() {
 		if(row.length() == 0) continue;
 
 		x = 0;
-		for(int i = 0; i < row.length(); i++) {
+		for(unsigned int i = 0; i < row.length(); i++) {
 			std::map<char, std::string>::iterator it = brick_info.find(row[i]);
 			if(it == brick_info.end()) continue;
-			Brick *brick = new Brick(it->second, x, y, brick_width, brick_height);
+			Brick *brick = new Brick(it->second, (float)x, (float)y, brick_width, brick_height);
 			brick->Create(spriteManager, 0, 0);
 			bricks.push_back(brick);
 			x += brick_width;
@@ -330,3 +295,53 @@ void Game::setNextState(std::string state) {
 bool Game::IsType(const std::string &type) {
 	return type.compare("Game") == 0;
 };
+
+void Game::checkBallsBrickCollision() {
+	for(auto it = balls.begin(); it != balls.end(); ++it) {
+		for(auto b = bricks.begin(); b != bricks.end(); ++b) {
+			if(CollisionManager::collideRect((*it)->getBounds(), (*b)->getBounds())) {
+				Brick *brick = (*b);
+				Ball *ball = (*it);
+
+				float collisionLeft = (ball->getX() + ball->getWidth()) - brick->getX();
+				float collisionRight = ball->getX() - (brick->getX() + brick->getWidth());
+				float collisionTop = (ball->getY() + ball->getHeight()) - brick->getY();
+				float collisionBottom = ball->getY() - (brick->getY() + brick->getHeight());
+
+				float cutoff = 1.0f;
+				float bounced = false;
+
+				if(fabsf(collisionLeft) < cutoff) {
+					if(ball->getDirectionX() > 0.0f) {
+						printf("Collide left\n");
+						bounced = true;
+						ball->invertDirectionX();
+					}
+				} else if(fabsf(collisionRight) < cutoff) {
+					if(ball->getDirectionX() < 0.0f) {
+						printf("Collide right\n");
+						bounced = true;
+						ball->invertDirectionX();
+					}
+				} else if(fabsf(collisionTop) < cutoff) {
+					if(ball->getDirectionY() > 0.0f) {		
+						printf("Collide top\n");		
+						bounced = true;		
+						ball->invertDirectionY();
+					}
+				} else if(fabsf(collisionBottom) < cutoff) {
+					if(ball->getDirectionY() < 0.0f) {
+						printf("Collide bottom\n");
+						bounced = true;
+						ball->invertDirectionY();
+					}
+				}
+				if(bounced) {
+					delete (*b);
+					b = bricks.erase(b);
+					--b;
+				}
+			}
+		}
+	}
+}
