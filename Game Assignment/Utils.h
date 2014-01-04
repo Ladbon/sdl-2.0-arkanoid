@@ -11,6 +11,13 @@ struct Circle {
 	float radius;
 };
 
+struct RGB {
+	int r;
+	int g;
+	int b;
+	int a;
+};
+
 namespace Utils {
 
 	/* Generates truly random numbers */
@@ -26,8 +33,8 @@ namespace Utils {
 	/* Converts an integer to a string */
 	std::string int_to_string(int v);
 
-	/* Converts a char to a string */
-	std::string char_to_string(char v);
+	/* Converts a string to a float */
+	float string_to_float(std::string s);
 
 	/* Splits a string by a delimiter and returns a vector with std::string */
 	std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
@@ -50,6 +57,12 @@ namespace Utils {
 	/* Compare float numbers */
 	bool AreSame(float a, float b);
 	bool AreSame(double a, double b);
+
+	/* Converts a hexadecimal color to a RGB struct */
+	RGB HexToRGB(int hex);
+
+	/* Converts all uppercase letters to lowercase */
+	std::string toLower(std::string string);
 }
 
 #endif

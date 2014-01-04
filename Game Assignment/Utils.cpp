@@ -39,6 +39,10 @@ namespace Utils {
 		return ostr.str();
 	}
 
+	float string_to_float(std::string s) {
+		return std::stof(s);
+	}
+
 	std::vector<std::string> &Utils::split(const std::string &s, char delim, std::vector<std::string> &elems) {
 		std::stringstream ss(s);
 		std::string item;
@@ -78,5 +82,20 @@ namespace Utils {
 
 	bool Utils::AreSame(double a, double b) {
 		 return fabs(a - b) < FLT_EPSILON;
+	}
+
+	RGB Utils::HexToRGB(int hex) {
+		RGB rgbColor;
+		rgbColor.r = ((hex >> 16) & 0xFF) / 255.0;
+		rgbColor.g = ((hex >> 8) & 0xFF) / 255.0;
+		rgbColor.b = ((hex) & 0xFF) / 255.0;
+		rgbColor.a = 255;
+
+		return rgbColor; 
+	}
+
+	std::string toLower(std::string string) {
+		std::transform(string.begin(), string.end(), string.begin(), ::tolower);
+		return string;
 	}
 }

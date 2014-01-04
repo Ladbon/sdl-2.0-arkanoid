@@ -9,10 +9,13 @@ public:
 	~Ball(void);
 
 	void setSpeed(float _speed) { speed = _speed; }
+	void setMaxSpeed(float _max_speed) { max_speed = _max_speed; }
+	void increaseSpeed(float _speed_increase) { speed += _speed_increase; }
 	void setDirection(float _dx, float _dy) { dx = _dx; dy = _dy; }
 	void setDirectionX(float _dx) { dx = _dx; }
 	void setDirectionY(float _dy) { dy = _dy; }
 	void update(float dt) {
+		if(speed > max_speed) speed = max_speed;
 		if(freezed) return;
 		x += dx * speed * dt;
 		y += dy * speed * dt;
@@ -37,6 +40,7 @@ public:
 
 private:
 	float speed;
+	float max_speed;
 	float dx;
 	float dy;
 	float radius;

@@ -1,7 +1,13 @@
-width = 700
+width = 840
 height = 900
 background_red = 0
 background_green = 0
 background_blue = 0
 background_alpha = 255
 start_lifes = 3
+paddle_bnc_speed_inc = 0.4
+paddle_bnc_wide = 3.0
+start_balls_amount = 1
+start_balls_widex = 0.8
+ball_max_speed = 30.0
+ball_default_speed = 15.0

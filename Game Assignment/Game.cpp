@@ -11,7 +11,9 @@
 #include "Player.h"
 #include "Brick.h"
 #include "Ball.h"
-#include "Particle.h"
+#include "Config.h"
+#include "Text.h"
+#include "Color.h"
 
 struct Rect {
 	float top, bottom, left, right;
@@ -21,31 +23,38 @@ Game::Game() {
 	level = 1;
 	player = nullptr;
 	balls.clear();
-	particles.clear();
+	life_text = nullptr;
+	score_text = nullptr;
 };
 
 bool Game::Init() {
 	printf("Game init\n");
+
+	// Set the mouse to the center of the screen
+	SDL_WarpMouseInWindow(window, drawManager->getWidth()/2, drawManager->getHeight()/2);
+
+	// Creates the destroyable bricks
 	InitBricks();
+	
+	// Create player(paddle)
 	player = new Player("paddle_normal.png", (float)(drawManager->getWidth() * 0.5) - 50, (float)(drawManager->getHeight() - 50), 100, 20);
 	player->Create(spriteManager, 0, 0);
 
-	Ball* ball = new Ball("ball.png", (float)(drawManager->getWidth() * 0.5) - 10, (float)(drawManager->getHeight() - 50 - 20), 20, 20);
-	ball->Create(spriteManager, 0, 0);
-	ball->setSpeed(20.0);
-	ball->setDirection(Utils::Random::frandom(-0.8f, 0.8f), -1.0f);
-	ball->freeze();
-	balls.push_back(ball);
-
-	/* Set the mouse to the center of the screen */
-	SDL_WarpMouseInWindow(window, drawManager->getWidth()/2, drawManager->getHeight()/2);
+	// Spawn start(ing) ball(s)
+	int start_balls = 1;
+	if(Config::defined("start_balls_amount")) start_balls = Utils::string_to_int(Config::get("start_balls_amount"));	
+	for(int i = 0; i < start_balls; i++) {
+		spawnBall();
+	}
 	
+	// Init text objects
+	life_text = new Text(10, drawManager->getHeight() - 50, "Arial", 20, "Lifes: " + Utils::int_to_string(player->getLifes()), drawManager->getRenderer());
+	score_text = new Text(drawManager->getWidth() - 100, drawManager->getHeight() - 50, "Arial", 20, "Score: 0", drawManager->getRenderer());
 	return true;
 }
 
 void Game::Exit() {
-
-	/* Delallocate all of our balls */
+	// Remove balls
 	if(balls.size() > 0) {
 		auto it = balls.begin();
 		while(it != balls.end()) {
@@ -55,27 +64,23 @@ void Game::Exit() {
 	}
 	balls.clear();
 
-	/* Deallocate all of the particles(might be removed in future because current particles sucks) */
-	if(particles.size() > 0) {
-		auto it = particles.begin();
-		while(it != particles.end()) {
+	// Remove bricks
+	if(bricks.size() > 0) {
+		auto it = bricks.begin();
+		while(it != bricks.end()) {
 			delete (*it);
 			++it;
 		};
 	}
-	particles.clear();
 
-	/* Deallocate bricks */
-	/*if(bricks.size() > 0) {
-		auto it = particles.begin();
-		while(it != particles.end()) {
-			delete (*it);
-			++it;
-		};
-	}*/
-	particles.clear();
-	
-	/* Deallocate player */
+	// Texts
+	delete life_text;
+	life_text = nullptr;
+
+	delete score_text;
+	score_text = nullptr;
+
+	// Remove player
 	delete player;
 	player = nullptr;
 
@@ -83,14 +88,6 @@ void Game::Exit() {
 }
 
 bool Game::Update() {
-	/**
-	*	DEBUG 
-	*/
-	if(keyboard->IsDown(SDLK_SPACE)) {
-		balls[0]->setSpeed(8.0f);
-	} else {
-		balls[0]->setSpeed(20.0f);
-	}
 	/**
 	*	RELEASE BALL
 	*/
@@ -100,9 +97,7 @@ bool Game::Update() {
 		}
 	}
 
-	/**
-	*	PLAYER MOVEMENT
-	*/
+	// Player movement
 	player->setX((float)(mouse->GetX()-(player->getWidth()*0.5f)));
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		if((*it)->isFreezed()) {
@@ -110,9 +105,7 @@ bool Game::Update() {
 		}
 	}
 
-	/**
-	*	PLAYER COLLISION WITH WINDOW BOUNDS
-	*/
+	// Player collision with bounds
 	if(player->getX() < 0) { player->setX(0.0f); }
 	if(player->getY() < 0) { player->setY(0.0f); }
 	if(player->getX() + player->getWidth() > this->drawManager->getWidth()) { 
@@ -125,71 +118,43 @@ bool Game::Update() {
 	/**
 	*	BALL(S) COLLISION WITH BOUNDS
 	*/
-	std::vector<Ball*> colliding_balls;
-	colliding_balls.clear();
 
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		if((*it)->getX() < 0) {
 			(*it)->setX(0.0f);
 			(*it)->setDirectionX((*it)->getDirectionX()*-1);
-			colliding_balls.push_back((*it));
 		}
 
 		if((*it)->getX() + (*it)->getWidth() > drawManager->getWidth()) {
 			(*it)->setX((float)(drawManager->getWidth() - (*it)->getWidth()));
 			(*it)->setDirectionX((*it)->getDirectionX()*-1);
-			colliding_balls.push_back((*it));
 		}
 		
 		if((*it)->getY() < 0) {
 			(*it)->setY(0.0f);			
 			(*it)->setDirectionY((*it)->getDirectionY()*-1);
-			colliding_balls.push_back((*it));
 		}
 		
 		if((*it)->getY() + (*it)->getHeight() > drawManager->getHeight()) {
 			(*it)->setY((float)(drawManager->getHeight() - (*it)->getHeight()));			
 			(*it)->setDirectionY((*it)->getDirectionY()*-1);
-			colliding_balls.push_back((*it));
 		}
 	}
 	
-	if(colliding_balls.size() > 0) {
-		for(auto it = colliding_balls.begin(); it != colliding_balls.end(); ++it) {
-			SpawnParticles(100, (int)(*it)->getX(), (int)(*it)->getY());
-		}		
-	}
-
-	/**
-	*	BALL COLLISION WITH BRICKS
-	*/
-	checkBallsBrickCollision();
-
-	/* Move balls */
+	// Update the balls location
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		(*it)->update((*it)->getSpeed() * deltatime);
-		std::vector<float> overflow(2, 0);
-
 	}
 
-	/**
-	*	UPDATE PARTICLES
-	*/
-	auto it = particles.begin();
-	while(it != particles.end()) {
-		if((*it)->isDead()) {
-			it = particles.erase(it);
-		} else {
-			(*it)->update(deltatime);
-			if((*it)->getX() < 0 || (*it)->getX() > drawManager->getWidth()) (*it)->setVelX((*it)->getVelX()*-1);
-			if((*it)->getY() < 0 || (*it)->getY() > drawManager->getHeight()) (*it)->setVelY((*it)->getVelY()*-1);
-			++it;
-		}
-	}
+	// Manage balls vs bricks collision
+	checkBallsBrickCollision();
 
-	/**
-	*	RESTART GAME
-	*/
+	// Manage balls vs paddle collision
+	checkBallsPaddleCollision();
+
+	score_text->setText("Score: " + Utils::int_to_string(player->getScore()));
+
+	// Restart game
 	if(this->keyboard->IsDownOnce(SDLK_r)) {
 		next_state = "Game";
 		return false;
@@ -199,9 +164,6 @@ bool Game::Update() {
 }
 
 void Game::Draw() {
-	/**
-	*	DRAW PLAYER
-	*/
 	player->draw(drawManager);
 	
 	for(auto it = bricks.begin(); it != bricks.end(); ++it) {
@@ -216,16 +178,8 @@ void Game::Draw() {
 		(*it)->draw(drawManager);
 	}
 
-	for(auto it = particles.begin(); it != particles.end(); ++it) {
-		(*it)->draw(drawManager);
-	}
-}
-
-void Game::SpawnParticles(int amount, int x, int y) {
-	for(int i = 0; i < amount; i++) {
-		Particle* part = new Particle((float)x,(float)y, Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(-1.0, 1.0), Utils::Random::frandom(100.0, 200.0), Utils::Random::random(100, 700), 0);
-		particles.push_back(part);
-	}
+	life_text->draw();
+	score_text->draw();
 }
 
 bool Game::InitBricks() {
@@ -296,6 +250,17 @@ bool Game::IsType(const std::string &type) {
 	return type.compare("Game") == 0;
 };
 
+void Game::spawnBall() {
+	Ball* ball = new Ball("ball.png", (float)(drawManager->getWidth() * 0.5) - 10, (float)(drawManager->getHeight() - 50 - 20), 20, 20);
+	ball->Create(spriteManager, 0, 0);
+	ball->setMaxSpeed((Config::defined("ball_max_speed") ? Utils::string_to_float(Config::get("ball_max_speed")) : 30.0));
+	ball->setSpeed((Config::defined("ball_default_speed") ? Utils::string_to_float(Config::get("ball_default_speed")) : 15.0));
+	float x_direction = ((Config::defined("start_balls_widex") ? Utils::string_to_float(Config::get("start_balls_widex")) : 8.0f));
+	ball->setDirection(Utils::Random::frandom(-x_direction, x_direction), -1.0f);
+	ball->freeze();
+	balls.push_back(ball);
+}
+
 void Game::checkBallsBrickCollision() {
 	for(auto it = balls.begin(); it != balls.end(); ++it) {
 		for(auto b = bricks.begin(); b != bricks.end(); ++b) {
@@ -313,25 +278,21 @@ void Game::checkBallsBrickCollision() {
 
 				if(fabsf(collisionLeft) < cutoff) {
 					if(ball->getDirectionX() > 0.0f) {
-						printf("Collide left\n");
 						bounced = true;
 						ball->invertDirectionX();
 					}
 				} else if(fabsf(collisionRight) < cutoff) {
 					if(ball->getDirectionX() < 0.0f) {
-						printf("Collide right\n");
 						bounced = true;
 						ball->invertDirectionX();
 					}
 				} else if(fabsf(collisionTop) < cutoff) {
-					if(ball->getDirectionY() > 0.0f) {		
-						printf("Collide top\n");		
+					if(ball->getDirectionY() > 0.0f) {
 						bounced = true;		
 						ball->invertDirectionY();
 					}
 				} else if(fabsf(collisionBottom) < cutoff) {
 					if(ball->getDirectionY() < 0.0f) {
-						printf("Collide bottom\n");
 						bounced = true;
 						ball->invertDirectionY();
 					}
@@ -343,5 +304,20 @@ void Game::checkBallsBrickCollision() {
 				}
 			}
 		}
+	}
+}
+
+void Game::checkBallsPaddleCollision() {
+	for(auto it = balls.begin(); it != balls.end(); ++it) {
+		Ball *ball = (*it);
+		std::vector<float> overflow(2, 0);
+		if(CollisionManager::collideRectPlus((*it)->getBounds(), player->getBounds(), overflow)) {
+            if(overflow[0] != 0 || overflow[1] != 0) {
+				ball->increaseSpeed((Config::defined("paddle_bnc_speed_inc")) ? Utils::string_to_float(Config::get("paddle_bnc_speed_inc")) : 0.01);
+				ball->setY(player->getY() - ball->getHeight());
+				(*it)->setDirectionY((*it)->getDirectionY()*-1);				
+				(*it)->setDirectionX(((((*it)->getX() + (*it)->getWidth()*.5) - (player->getX() + player->getWidth()*.5))/player->getWidth()*.5) * (Config::defined("paddle_bnc_wide") ? Utils::string_to_float(Config::get("paddle_bnc_wide")) : 3.0f));
+            }
+        }
 	}
 }

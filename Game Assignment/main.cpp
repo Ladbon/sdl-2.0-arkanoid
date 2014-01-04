@@ -5,8 +5,12 @@
 #include "Menu.h"
 #include "Game.h"
 #include "Highscore.h"
+#include "SDL_ttf.h"
 
 int main(int argc, char *argv[]) {
+	if(TTF_Init() == -1) {
+		printf("SDL_TTF couldn't be initialized\n");
+	}
 	Utils::Random::seed();
 	Config::parseFile("../config.txt");
 	Engine engine;
