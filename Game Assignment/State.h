@@ -4,8 +4,6 @@
 
 class DrawManager;
 class SpriteManager;
-class Keyboard;
-class Mouse;
 struct SDL_Window;
 
 class State {
@@ -25,9 +23,6 @@ public:
 	SDL_Window *window;
 	DrawManager *drawManager;
 	SpriteManager *spriteManager;
-
-	Keyboard *keyboard;
-	Mouse *mouse;
 
 	float deltatime;
 	unsigned int ticks;

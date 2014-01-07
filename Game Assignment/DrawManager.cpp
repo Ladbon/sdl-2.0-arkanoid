@@ -12,6 +12,8 @@ DrawManager::~DrawManager()
 
 bool DrawManager::Initialize(SDL_Window *window, int _width, int _height) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    SDL_RenderSetLogicalSize(renderer, _width, _height);
 	if(renderer == nullptr) {
 		return false;
 	};
@@ -24,7 +26,6 @@ bool DrawManager::Initialize(SDL_Window *window, int _width, int _height) {
 
 void DrawManager::Cleanup() {
 	if(renderer != nullptr) {
-		printf("Renderer is destroyed\n");
 		SDL_DestroyRenderer(renderer);
 		renderer = nullptr;
 	}

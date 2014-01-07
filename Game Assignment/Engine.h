@@ -1,11 +1,11 @@
 #pragma once
 #include <vector>
 
-class Keyboard;
-class Mouse;
 class State;
+class Text;
 class DrawManager;
 class SpriteManager;
+class Entity;
 struct SDL_Window;
 
 class Engine
@@ -21,26 +21,18 @@ public:
 	void SetState(const std::string &type);
 	void ChangeState();
 
-	/**
-	*	Handles deltatime and tick specific functions
-	*/
 	void UpdateTime();
-
-	/**
-	*	Handles basic events such as window resize
-	*/
 	void HandleEvents();
-
-
 	void Update();
 	void Draw();
 
 	bool Running() { return m_running; }
-	void Quit() { m_running = false; };
+	void Quit() { m_running = false;  };
 
 	DrawManager *getDrawManager() { return drawManager; }
 	SpriteManager *getSpriteManager() { return spriteManager; }
 private:
+	Entity* cursor;
 	std::vector<State*> states;
 	State *current;
 
@@ -48,8 +40,7 @@ private:
 	DrawManager *drawManager;
 	SpriteManager *spriteManager;
 
-	Keyboard *keyboard;
-	Mouse *mouse;
-	
+	Text* debug;
+
 	bool m_running;
 };

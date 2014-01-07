@@ -1,13 +1,35 @@
+name = Arkanoid
+gamearea_x = 0
+gamearea_y = 45
+resolution_x = 1024
+resolution_y = 768
 width = 840
 height = 900
-background_red = 0
-background_green = 0
-background_blue = 0
+fullscreen = false
+background_red = 255
+background_green = 255
+background_blue = 255
 background_alpha = 255
 start_lifes = 3
+brick_destroy_bonus= 5
+brick_hit_mutliple = 3
 paddle_bnc_speed_inc = 0.4
 paddle_bnc_wide = 3.0
 start_balls_amount = 1
 start_balls_widex = 0.8
 ball_max_speed = 30.0
 ball_default_speed = 15.0
+
+gfx_path = ../assets/gfx/
+sound_path = ../assets/audio/sounds/
+music_path = ../assets/audio/music/
+theme_path = ../themes/
+resolution_path = ../resolutions.txt
+
+menu_mouse_select = true
+menu_keyboard_select = true
+menu_text_padding = 40
+menu_current_color = 0x0070ff
+menu_idle_color = 0x000000
+
+default_text_color = 0x000000

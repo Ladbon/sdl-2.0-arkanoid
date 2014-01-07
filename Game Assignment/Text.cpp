@@ -4,9 +4,10 @@
 #include "DrawManager.h"
 #include "SDL.h"
 #include "Color.h"
+#include "Rectangle.h"
+#include "Config.h"
 
-Text::Text(int _x, int _y, std::string _fontFamily, int _fontSize, std::string _text, SDL_Renderer* _renderer) {
-	printf("Text constructor called\n");
+Text::Text(int _x, int _y, std::string _fontFamily, int _fontSize, std::string _text, SDL_Renderer* _renderer): Rectangle(_x, _y, 0, 0) {
 	fontFamily = _fontFamily;
 	fontSize = _fontSize;
 	text = _text;
@@ -17,8 +18,7 @@ Text::Text(int _x, int _y, std::string _fontFamily, int _fontSize, std::string _
 	height = 0;
 	renderer = _renderer;
 	color = nullptr;
-
-	color = new Color(0x00FF00);
+	color = new Color(Config::getInt("default_text_color", 0x000000));
 
 	updateFont();
 	updateSize();
@@ -48,22 +48,6 @@ Color Text::getColor() {
 	return *color;
 }
 
-int Text::getX() {
-	return x;
-}
-
-int Text::getY() {
-	return y;
-}
-
-int Text::getWidth() {
-	return width;
-}
-
-int Text::getHeight() {
-	return height;
-}
-
 void Text::setFontFamily(std::string _fontFamily) {
 	fontFamily = _fontFamily;
 	updateFont();
@@ -87,14 +71,6 @@ void Text::setColor(int hex) {
 	update();
 }
 
-void Text::setX(int _x) {
-	x = _x;
-}
-
-void Text::setY(int _y) {
-	y = _y;
-}
-
 void Text::draw() {
 	SDL_Rect pos = {x, y, width, height};
 	SDL_RenderCopy(renderer, texture, nullptr, &pos);
@@ -107,7 +83,7 @@ void Text::updateFont() {
 }
 
 void Text::update() {
-	surface = TTF_RenderText_Blended(font, text.c_str(), color->getAsSDL());
+	surface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), color->getAsSDL(), 0);
 	texture = SDL_CreateTextureFromSurface(renderer, surface);
 }
 

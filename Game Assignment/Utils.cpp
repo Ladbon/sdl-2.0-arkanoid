@@ -76,6 +76,10 @@ namespace Utils {
 		return std::stoi(v);
 	}
 
+	int char_to_int(char v) {
+		return std::atoi(&v);
+	}
+
 	bool Utils::AreSame(float a, float b) {
 		 return fabs(a - b) < FLT_EPSILON;
 	}
@@ -97,5 +101,14 @@ namespace Utils {
 	std::string toLower(std::string string) {
 		std::transform(string.begin(), string.end(), string.begin(), ::tolower);
 		return string;
+	}
+
+	int string_to_hex(std::string v) {
+		std::stringstream str;
+		std::string s1 = v;
+		str << s1;
+		int value;
+		str >> std::hex >> value;
+		return value;
 	}
 }

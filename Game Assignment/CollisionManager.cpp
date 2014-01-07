@@ -7,17 +7,15 @@
 #include "Utils.h" // For SDL_Circle
 
 namespace CollisionManager {
-	/* Rectangle vs Point intersection */
+
 	bool collideRectPoint(SDL_Rect a, float _point[]) {
 		return (a.x >= _point[0] && _point[0] <= (a.x + a.w) && a.y >= _point[1] && _point[1] <= (a.y + a.h));
 	}
 
-	/* Rectangle vs Rectangle intersection */
 	bool collideRect(SDL_Rect a, SDL_Rect b) {
 		return !(a.x + a.w < b.x || a.y + a.h < b.y || a.x > b.x + b.w || a.y > b.y + b.h);
 	}
 
-	/* Circle vs Circle intersection */
 	bool collideCircle(Circle a, Circle b) {
 		float dx = b.x - a.x;
 		float dy = b.y - a.y;
@@ -27,7 +25,23 @@ namespace CollisionManager {
 		return false;
 	}
 
-	/* Pixelperfect collision uses this */
+	bool collideRectCircle(SDL_Rect a, Circle b) {
+		/*
+		var closestPoint:Point = center.clone();
+    
+    if( center.x < min.x ) closestPoint.x = min.x;
+    else if( center.x > max.x ) closestPoint.x = max.x;
+    if( center.y < min.y ) closestPoint.y = min.y;
+    else if( center.y > max.y ) closestPoint.y = max.y;
+    
+    var diff:Point = closestPoint.subtract( center );
+    if( diff.x * diff.x + diff.y * diff.y > radius * radius ) return null;
+    
+    return closestPoint;
+		*/
+		return false;
+	}
+
 	SDL_Rect Intersection(const SDL_Rect& a, const SDL_Rect& b) {
 		int x1 = Maximum(a.x, b.x);
 		int y1 = Maximum(a.y, b.y);

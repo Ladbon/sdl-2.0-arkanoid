@@ -2,16 +2,20 @@
 
 #include "SpriteManager.h"
 #include "Sprite.h"
+#include "Rectangle.h"
 #include <string>
 
 struct SDL_Rect;
 
-class Entity {
+class Entity : public Rectangle {
 public:
 	Entity(std::string filename, float x, float y, int width, int height);
 	~Entity();
 
-	// Getters
+	int getTop();
+	int getBottom();
+	int getLeft();
+	int getRight();
 	float getX() { return x; }
 	float getY() { return y; }	
 	int getWidth() { return width; }
@@ -27,6 +31,7 @@ public:
 	void setWidth(int _width) { width = _width; }
 	void setHeight(int _height) { height = _height; }
 	void setAlpha(int a) { alpha = a; }
+	void setFilename(std::string _filename) { filename = _filename; }
 
 	void move(float _x, float _y) { 
 		x += _x; 

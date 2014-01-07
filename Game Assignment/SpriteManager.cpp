@@ -3,7 +3,6 @@
 #include "DrawManager.h"
 #include "Sprite.h"
 
-
 SpriteManager::SpriteManager(DrawManager *_draw_manager)
 {
 	draw_manager = _draw_manager;
@@ -15,12 +14,11 @@ SpriteManager::~SpriteManager()
 }
 
 bool SpriteManager::Init(const std::string &_directory) {
-	printf("SpriteManager was initialized\n");
 	int flags = IMG_INIT_PNG;
 	int initialized = IMG_Init(flags);
 
-	if(initialized&flags != flags) {
-		printf("IMG_Init error: %s\n", IMG_GetError());
+	if((initialized & flags) != flags) {
+		printf("[IMG] IMG_Init error: %s\n", IMG_GetError());
 		return false;
 	}
 	directory = _directory;

@@ -4,7 +4,9 @@
 #include "SDL.h"
 
 
-Entity::Entity(std::string _filename, float _x, float _y, int _width, int _height) {
+Entity::Entity(std::string _filename, float _x, float _y, int _width, int _height):
+	Rectangle(_x, _y, _width, _height) 
+{
 	x = _x;
 	y = _y;
 	width = _width;
@@ -12,6 +14,12 @@ Entity::Entity(std::string _filename, float _x, float _y, int _width, int _heigh
 	filename = _filename;
 	alpha = 255;
 }
+
+
+int Entity::getTop() { return (int)y; }
+int Entity::getBottom() { return (int)(y) + height; };
+int Entity::getLeft() { return (int)(x); }
+int Entity::getRight() { return (int)(x) + width; }
 
 bool Entity::Create(SpriteManager *spriteManager, int offset_x, int offset_y) {
 	sprite = spriteManager->Load(filename, offset_x, offset_y, width, height);

@@ -3,31 +3,52 @@
 #include "Config.h"
 
 #include "Menu.h"
+#include "Options.h"
+#include "GFXState.h"
 #include "Game.h"
 #include "Highscore.h"
 #include "SDL_ttf.h"
+#include "SDL_mixer.h"
+#include "Sound.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {	
+	Config::parseFile("../config.txt");
+
 	if(TTF_Init() == -1) {
 		printf("SDL_TTF couldn't be initialized\n");
 	}
-	Utils::Random::seed();
-	Config::parseFile("../config.txt");
-	Engine engine;
 
+	int flags = MIX_INIT_OGG | MIX_INIT_MP3;
+	if(((Mix_Init(flags) & flags) != flags) || (-1 == Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024))) {
+		printf("Couldn't initialize audio: %s\n", Mix_GetError());
+	}
+	Mix_AllocateChannels(16);
+
+	// Init sounds
+	SoundManager::SoundManager();
+	SoundManager::setSoundDir(Config::get("sound_path"));
+	SoundManager::setMusicDir(Config::get("music_path"));
+	SoundManager::addSound("paddle_bounce", "paddle_bounce.wav");
+	SoundManager::addSound("block_hit", "block_hit.wav");
+	SoundManager::addSound("block_destroy", "block_destroy.wav");
+	SoundManager::addSound("menu_select", "menu_select.wav");
+	SoundManager::addMusic("only_time", "only_time.mp3");
+
+	Utils::Random::seed();
+	Engine engine;
 	engine.Attach(new Menu);
+	engine.Attach(new Options);
+	engine.Attach(new GFXState);
 	engine.Attach(new Game);
 	engine.Attach(new Highscore);
-
-	if(engine.Init("Arkatris, hybrid name of Arkanoid and Tetris", 0, 0)) {
+	if(engine.Init(Config::get("name").c_str(), 0, 0)) {
 		engine.SetState("Menu");
-		printf("Starting main loop\n");
 		while(engine.Running()) {
 			engine.HandleEvents();
 			engine.Update();
 			engine.Draw();
 		}
-		printf("Ending main loop\n");
 	}
+	Mix_AllocateChannels(0);
 	return 0;
 }

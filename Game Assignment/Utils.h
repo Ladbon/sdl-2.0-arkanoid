@@ -51,6 +51,9 @@ namespace Utils {
 	/* Convert string to int */
 	int string_to_int(std::string v);
 
+	/* Converts a char into a int */
+	int char_to_int(char v);
+
 	/* Rounds a number the the nearest number n */
 	float roundToNearestN(float x, float n);
 
@@ -63,6 +66,9 @@ namespace Utils {
 
 	/* Converts all uppercase letters to lowercase */
 	std::string toLower(std::string string);
+
+	/* Converts a string to hex */
+	int string_to_hex(std::string v);
 }
 
 #endif

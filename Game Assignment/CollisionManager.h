@@ -11,6 +11,7 @@ namespace CollisionManager {
 	bool collideRect(SDL_Rect a, SDL_Rect b);
 	bool collideRectPlus(SDL_Rect a, SDL_Rect b, std::vector<float> &r);
 	bool collideCircle(Circle a, Circle b);
+	bool collideRectCircle(SDL_Rect a, Circle b);
 	bool PixelPerfect(Entity* a, Entity* b);
 	SDL_Rect NormalizeBounds(SDL_Rect& rect);
 	SDL_Rect Intersection(SDL_Rect& a, SDL_Rect& b);
